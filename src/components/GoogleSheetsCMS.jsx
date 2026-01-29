@@ -22,7 +22,14 @@ export default function GoogleSheetsCMS() {
     fullDescription: '',
     details: '',
     videoUrl: '',
-    modelUrl: ''
+    modelUrl: '',
+
+    // NEW
+    img1: '', p1: '',
+    img2: '', p2: '',
+    img3: '', p3: '',
+    img4: '', p4: '',
+    img5: '', p5: ''
   });
 
   // === CONFIG ===
@@ -95,11 +102,18 @@ export default function GoogleSheetsCMS() {
       fullDescription: '',
       details: '',
       videoUrl: '',
-      modelUrl: ''
+      modelUrl: '',
+
+      img1: '', p1: '',
+      img2: '', p2: '',
+      img3: '', p3: '',
+      img4: '', p4: '',
+      img5: '', p5: ''
     });
     setEditingId(null);
     setShowAddForm(false);
   };
+
 
   const handleEdit = (project) => {
     setFormData({
@@ -291,6 +305,166 @@ export default function GoogleSheetsCMS() {
                     placeholder="Detailed description shown in expanded view"
                   />
                 </div>
+                {/* ------------------------------------------------------------ */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
+                    Image 1 URL
+                  </label>
+                  <input
+                    type="url"
+                    name="img1"
+                    value={formData.img1}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg"
+                    placeholder="https://example.com/image1.jpg"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
+                    Paragraph 1
+                  </label>
+                  <textarea
+                    name="p1"
+                    value={formData.p1}
+                    onChange={handleInputChange}
+                    rows="3"
+                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg resize-none"
+                    placeholder="Text shown below Image 1"
+                  />
+                </div>
+
+
+
+                {/* -------------------------------------------------------------------- */}
+                  {/* ------------------------------------------------------------ */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
+                    Image 2 URL
+                  </label>
+                  <input
+                    type="url"
+                    name="img2"
+                    value={formData.img2}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg"
+                    placeholder="https://example.com/image2.jpg"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
+                    Paragraph 2
+                  </label>
+                  <textarea
+                    name="p2"
+                    value={formData.p2}
+                    onChange={handleInputChange}
+                    rows="3"
+                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg resize-none"
+                    placeholder="Text shown below Image 2"
+                  />
+                </div>
+
+
+
+                {/* -------------------------------------------------------------------- */}
+                  {/* ------------------------------------------------------------ */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
+                    Image 3 URL
+                  </label>
+                  <input
+                    type="url"
+                    name="img3"
+                    value={formData.img3}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg"
+                    placeholder="https://example.com/image3.jpg"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
+                    Paragraph 3
+                  </label>
+                  <textarea
+                    name="p3"
+                    value={formData.p3}
+                    onChange={handleInputChange}
+                    rows="3"
+                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg resize-none"
+                    placeholder="Text shown below Image 3"
+                  />
+                </div>
+
+
+
+                {/* -------------------------------------------------------------------- */}
+                  {/* ------------------------------------------------------------ */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
+                    Image 4 URL
+                  </label>
+                  <input
+                    type="url"
+                    name="img4"
+                    value={formData.img4}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg"
+                    placeholder="https://example.com/image4.jpg"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
+                    Paragraph 4
+                  </label>
+                  <textarea
+                    name="p4"
+                    value={formData.p4}
+                    onChange={handleInputChange}
+                    rows="3"
+                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg resize-none"
+                    placeholder="Text shown below Image 4"
+                  />
+                </div>
+
+
+
+                {/* -------------------------------------------------------------------- */}
+                  {/* ------------------------------------------------------------ */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
+                    Image 5 URL
+                  </label>
+                  <input
+                    type="url"
+                    name="img5"
+                    value={formData.img5}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg"
+                    placeholder="https://example.com/image5.jpg"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
+                    Paragraph 5
+                  </label>
+                  <textarea
+                    name="p5"
+                    value={formData.p5}
+                    onChange={handleInputChange}
+                    rows="3"
+                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg resize-none"
+                    placeholder="Text shown below Image 5"
+                  />
+                </div>
+
+
+
+                {/* -------------------------------------------------------------------- */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-semibold text-gray-300 mb-2">
                     Details (separate with semicolons)
