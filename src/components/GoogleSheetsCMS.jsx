@@ -1,8 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Save, X, AlertCircle, CheckCircle, Loader } from 'lucide-react';
+import { useDropzone } from 'react-dropzone';
+
 
 export default function GoogleSheetsCMS() {
+
+  const [uploading, setUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState('');
+
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError]   = useState('');
@@ -114,6 +120,66 @@ export default function GoogleSheetsCMS() {
     setShowAddForm(false);
   };
 
+  // --------------------------------------------------------------------------
+
+  const uploadImage = async (file) => {
+    if (!file) return;
+
+    if (!formData.title) {
+      alert('Please enter a project title before uploading an image.');
+      return;
+    }
+
+    setUploading(true);
+
+    const reader = new FileReader();
+
+    reader.onload = async () => {
+      try {
+        const base64 = reader.result.split(',')[1];
+
+        const res = await fetch('http://localhost:4000/upload-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fileName: file.name,
+            fileBase64: base64,
+            projectSlug: formData.title
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-'),
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          console.error('Upload failed:', data);
+          alert(data.error || 'Upload failed');
+          setUploading(false);
+          return;
+        }
+
+        setFormData(prev => ({ ...prev, img1: data.url }));
+        setImagePreview(data.url);
+      } catch (err) {
+        console.error(err);
+        alert('Unexpected upload error');
+      } finally {
+        setUploading(false);
+      }
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+
+  // -------------------------------------------------------------------------------
+  const { getRootProps, getInputProps } = useDropzone({
+    accept: { 'image/*': [] },
+    maxFiles: 1,
+    onDrop: (files) => uploadImage(files[0])
+  });
+  // -------------------------------------------------------------------------------
 
   const handleEdit = (project) => {
     setFormData({
@@ -237,7 +303,7 @@ export default function GoogleSheetsCMS() {
                     <option value="3d-modeling">3D Modeling</option>
                     <option value="electronics">Electronics</option>
                     <option value="documentation">Documentation</option>
-                    <option value="engineering">Engineering</option>
+                    <option value="website">Website</option>
                   </select>
                 </div>
                 <div>
@@ -310,14 +376,29 @@ export default function GoogleSheetsCMS() {
                   <label className="block text-sm font-semibold text-gray-300 mb-2">
                     Image 1 URL
                   </label>
-                  <input
-                    type="url"
-                    name="img1"
-                    value={formData.img1}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg"
-                    placeholder="https://example.com/image1.jpg"
-                  />
+                  <div
+                    {...getRootProps()}
+                    className="border-2 border-dashed border-cyan-500 rounded-lg p-6 text-center cursor-pointer hover:border-cyan-400 transition-colors"
+                  >
+                    <input {...getInputProps()} />
+
+                    {uploading ? (
+                      <p className="text-cyan-400">Uploading image...</p>
+                    ) : (
+                      <p className="text-gray-400">
+                        Drag & drop image here or click to upload
+                      </p>
+                    )}
+                  </div>
+
+                  {imagePreview && (
+                    <img
+                      src={imagePreview}
+                      alt="Uploaded preview"
+                      className="mt-4 w-full max-w-md rounded-lg border border-slate-600"
+                    />
+                  )}
+
                 </div>
 
                 <div className="md:col-span-2">
