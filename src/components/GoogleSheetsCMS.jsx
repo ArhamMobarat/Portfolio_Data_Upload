@@ -37,7 +37,7 @@ function ImageUpload({ label, value, onChange, projectSlug }) {
         const base64 = reader.result.split(",")[1];
 
         // 3. Send to backend
-        const res = await fetch("http://localhost:4000/upload-image", {
+        const res = await fetch(`${API_BASE}/upload-image`, {
           method: "POST",
           headers: {
             'Content-Type': 'application/json',
@@ -130,6 +130,7 @@ export default function GoogleSheetsCMS() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
+  const API_BASE = "https://portfolio-backend-servercode2.onrender.com";
 
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -168,7 +169,7 @@ export default function GoogleSheetsCMS() {
 
   // === HELPERS ===
 const callApi = async (action, data) => {
-  const res = await fetch('http://localhost:4000/sheets', {
+  const res = await fetch(`${API_BASE}/sheets`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -333,7 +334,7 @@ const callApi = async (action, data) => {
             onChange={(e) => setPassword(e.target.value)}
             onKeyDown={async (e) => {
               if (e.key === "Enter") {
-                const res = await fetch("http://localhost:4000/login", {
+                const res = await fetch(`${API_BASE}/login`, {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ password }),
