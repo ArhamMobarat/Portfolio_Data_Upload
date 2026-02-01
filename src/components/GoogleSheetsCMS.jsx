@@ -39,7 +39,10 @@ function ImageUpload({ label, value, onChange, projectSlug }) {
         // 3. Send to backend
         const res = await fetch("http://localhost:4000/upload-image", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            'Content-Type': 'application/json',
+            'x-admin-auth': 'true',
+          },
           body: JSON.stringify({
             fileName: file.name,
             fileBase64: base64,
@@ -121,7 +124,12 @@ function ImageUpload({ label, value, onChange, projectSlug }) {
 
 export default function GoogleSheetsCMS() {
 
-  
+  const [isAuthed, setIsAuthed] = useState(
+    localStorage.getItem('admin-auth') === 'true'
+  );
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
 
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -153,58 +161,51 @@ export default function GoogleSheetsCMS() {
   });
 
   // === CONFIG ===
-  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw3lIuhQML1XFB48_NsSGcr6PPY0f6dfJwCtmIzXPi0WSDv4HP7sxgoHjJZK7O1PTWh/exec';  
+  // const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw3lIuhQML1XFB48_NsSGcr6PPY0f6dfJwCtmIzXPi0WSDv4HP7sxgoHjJZK7O1PTWh/exec';  
           // e.g. https://script.google.com/macros/s/XXXX/exec
-  const API_KEY = 'APQrcs567';         // same as API_KEY in Apps Script
+          //        // same as API_KEY in Apps Script
   // For safety: you can inject these via env vars (Vite/Next) and not commit them.
 
   // === HELPERS ===
-  const callApi = async (action, data) => {
-    const res = await fetch(WEB_APP_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8'
-      },
-      body: JSON.stringify({
-        apiKey: API_KEY,
-        action,
-        data
-      })
-    });
+const callApi = async (action, data) => {
+  const res = await fetch('http://localhost:4000/sheets', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-admin-auth': 'true',
+    },
+    body: JSON.stringify({ action, data }),
+  });
 
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.error || 'API error');
-    return json;
-  };
+  const json = await res.json();
+  if (!json.ok) throw new Error(json.error || 'API error');
+  return json;
+};
 
 
-  const listApi = async () => {
-    const url = `${WEB_APP_URL}?apiKey=${encodeURIComponent(API_KEY)}`;
-    const res = await fetch(url, { method: 'GET' });
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.error || 'API error');
-    return json.rows || [];
-  };
 
-  useEffect(() => { loadProjects(); }, []);
-
+  // const listApi = async () => {
+  //   const url = `${WEB_APP_URL}?apiKey=${encodeURIComponent(API_KEY)}`;
+  //   const res = await fetch(url, { method: 'GET' });
+  //   const json = await res.json();
+  //   if (!json.ok) throw new Error(json.error || 'API error');
+  //   return json.rows || [];
+  // };
   const loadProjects = async () => {
     setLoading(true);
-    setError('');
     try {
-      const rows = await listApi();
-      // Ensure 'details' is a string (semicolon-separated) for your UI
-      const normalized = rows.map(r => ({
-        ...r,
-        details: Array.isArray(r.details) ? r.details.join('; ') : (r.details ?? '')
-      }));
-      setProjects(normalized);
-    } catch (err) {
-      setError('Failed to load projects from Google Sheets');
+      const res = await callApi('list', {});
+      setProjects(res.rows || []);
+    } catch {
+      setError('Failed to load projects');
     } finally {
       setLoading(false);
     }
   };
+
+
+  useEffect(() => { loadProjects(); }, []);
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -317,7 +318,55 @@ export default function GoogleSheetsCMS() {
       setSaving(false);
     }
   };
+  // console.log('LIST RESPONSE:', data);
 
+// ----------------------------
+  if (!isAuthed) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-900">
+        <div className="bg-slate-800 p-6 rounded-xl w-96">
+          <h2 className="text-xl font-bold mb-4 text-cyan-400">Admin Login</h2>
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Enter password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={async (e) => {
+              if (e.key === "Enter") {
+                const res = await fetch("http://localhost:4000/login", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ password }),
+                });
+
+                if (res.ok) {
+                  localStorage.setItem("admin-auth", "true");
+                  setIsAuthed(true);
+                } else {
+                  alert("Wrong password");
+                }
+              }
+            }}
+            className="w-full mb-3 px-4 py-2 rounded bg-slate-900 border border-slate-600 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500"
+          />
+
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="text-sm text-cyan-400 hover:underline mb-4"
+          >
+            {showPassword ? "Hide password" : "Show password"}
+          </button>
+
+
+
+            
+        </div>
+      </div>
+    );
+  }
+
+// ---------------------------
   // ---- UI (unchanged styling) ----
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
@@ -407,18 +456,16 @@ export default function GoogleSheetsCMS() {
                     placeholder="Enter subtitle"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-300 mb-2">
-                    Image URL
-                  </label>
-                  <input
-                    type="url"
-                    name="image"
+                <div className="md:col-span-2">
+                  <ImageUpload
+                    label="Main Image"
                     value={formData.image}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg focus:outline-none focus:border-cyan-500 transition-colors"
-                    placeholder="https://example.com/image.jpg"
+                    projectSlug={projectSlug}
+                    onChange={(url) =>
+                      setFormData((prev) => ({ ...prev, image: url }))
+                    }
                   />
+
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-semibold text-gray-300 mb-2">
