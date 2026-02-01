@@ -9,6 +9,10 @@ import { useDropzone } from 'react-dropzone';
 
 function ImageUpload({ label, value, onChange, projectSlug }) {
   const [imagePreview, setImagePreview] = useState(value || "");
+  useEffect(() => {
+    setImagePreview(value || "");
+  }, [value]);
+
   const [uploading, setUploading] = useState(false);
 
   const onDrop = async ([file]) => {
@@ -230,6 +234,17 @@ export default function GoogleSheetsCMS() {
     setShowAddForm(false);
   };
 
+
+  const handleToggleForm = () => {
+    if (showAddForm) {
+      // Closing the form → reset everything
+      resetForm();
+    } else {
+      // Opening the form → just show it
+      setShowAddForm(true);
+    }
+  };
+
   // --------------------------------------------------------------------------
   const projectSlug = formData.title
   .toLowerCase()
@@ -314,7 +329,10 @@ export default function GoogleSheetsCMS() {
               Projects CMS
             </h1>
             <button
-              onClick={() => setShowAddForm(!showAddForm)}
+              onClick={() => {
+                handleToggleForm();
+              }}
+
               className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-lg font-semibold hover:shadow-lg hover:shadow-cyan-500/50 transition-all transform hover:scale-105"
             >
               {showAddForm ? <X size={18} /> : <Plus size={18} />}
@@ -341,7 +359,7 @@ export default function GoogleSheetsCMS() {
 
         {/* Add/Edit Form */}
         {showAddForm && (
-          <div className="mb-8 bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-cyan-500/30 p-6 shadow-xl">
+          <div key={editingId || "new"} className="mb-8 bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-cyan-500/30 p-6 shadow-xl">
             <h2 className="text-2xl font-bold text-cyan-400 mb-6">
               {editingId ? 'Edit Project' : 'Add New Project'}
             </h2>
