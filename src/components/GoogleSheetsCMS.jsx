@@ -31,12 +31,21 @@ function ImageUpload({ label, value, onChange, projectSlug }) {
 
     try {
       // 2. Convert to base64
+      if (file.size > 1024 * 1024) {
+        alert("Image must be under 1MB");
+        return;
+      }
+
       const reader = new FileReader();
 
       reader.onload = async () => {
-        const base64 = reader.result.split(",")[1];
+        const base64 = reader.result
+          .split(",")[1]
+          .replace(/\s/g, "");
+
 
         // 3. Send to backend
+        const uniqueName = `${Date.now()}-${file.name}`;
         const res = await fetch(`${API_BASE}/upload-image`, {
           method: "POST",
           headers: {
@@ -44,7 +53,7 @@ function ImageUpload({ label, value, onChange, projectSlug }) {
             'x-admin-auth': 'true',
           },
           body: JSON.stringify({
-            fileName: file.name,
+            fileName: uniqueName,
             fileBase64: base64,
             projectSlug,
           }),
