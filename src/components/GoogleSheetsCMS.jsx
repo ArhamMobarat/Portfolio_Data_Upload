@@ -206,7 +206,7 @@ const callApi = async (action, data) => {
 
   const resetForm = () => {
     setFormData({
-      id: '',
+      id: Date.now().toString(),
       category: 'engineering',
       title: '',
       subtitle: '',
