@@ -7,7 +7,7 @@ import { useDropzone } from 'react-dropzone';
 // ------------------------------------------
 
 
-function ImageUpload({ label, value, onChange, projectSlug }) {
+function ImageUpload({ label, value, onChange, projectId }) {
   const [imagePreview, setImagePreview] = useState(value || "");
   useEffect(() => {
     setImagePreview(value || "");
@@ -15,68 +15,48 @@ function ImageUpload({ label, value, onChange, projectSlug }) {
 
   const [uploading, setUploading] = useState(false);
 
-  const onDrop = async ([file]) => {
-    if (!file) return;
+ const onDrop = async (acceptedFiles) => {
+  const file = acceptedFiles[0];
+  if (!file) return;
 
-    if (!projectSlug) {
-      alert("Please enter a project title first.");
-      return;
+  try {
+    const toBase64 = (file) =>
+      new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result.split(",")[1]);
+        reader.onerror = reject;
+      });
+
+    const base64 = await toBase64(file);
+    const API_URL = "https://portfolio-backend-servercode2.onrender.com"
+    const res = await fetch(`${API_URL}/upload-image`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        fileName: `${Date.now()}-${file.name}`,
+        fileBase64: base64,
+        projectId,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.url) {
+      throw new Error("Upload failed");
     }
 
-    setUploading(true);
+    // ✅ ONLY HERE do we update state
+    onChange(data.url);
 
-    // 1. Preview immediately
-    const previewUrl = URL.createObjectURL(file);
-    setImagePreview(previewUrl);
+  } catch (err) {
+    console.error("Image upload error:", err);
+    alert("Image upload failed. Check console.");
+  }
+};
 
-    try {
-      // 2. Convert to base64
-      if (file.size > 1024 * 1024) {
-        alert("Image must be under 1MB");
-        return;
-      }
-
-      const reader = new FileReader();
-
-      reader.onload = async () => {
-        const base64 = reader.result
-          .split(",")[1]
-          .replace(/\s/g, "");
-
-
-        // 3. Send to backend
-        const uniqueName = `${Date.now()}-${file.name}`;
-        const res = await fetch(`${API_BASE}/upload-image`, {
-          method: "POST",
-          headers: {
-            'Content-Type': 'application/json',
-            'x-admin-auth': 'true',
-          },
-          body: JSON.stringify({
-            fileName: uniqueName,
-            fileBase64: base64,
-            projectSlug,
-          }),
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.error || "Upload failed");
-        }
-
-        // 4. Save GitHub URL
-        onChange(data.url);
-      };
-
-      reader.readAsDataURL(file);
-    } catch (err) {
-      console.error(err);
-      alert("Image upload failed");
-    } finally {
-      setUploading(false);
-    }
-  };
 
   const { getRootProps, getInputProps } = useDropzone({
     accept: { "image/*": [] },
@@ -151,7 +131,7 @@ export default function GoogleSheetsCMS() {
 
   // Form state
   const [formData, setFormData] = useState({
-    id: '',
+    id: Date.now().toString(),
     category: 'engineering',
     title: '',
     subtitle: '',
@@ -177,6 +157,8 @@ export default function GoogleSheetsCMS() {
   // For safety: you can inject these via env vars (Vite/Next) and not commit them.
 
   // === HELPERS ===
+
+  
 const callApi = async (action, data) => {
   const res = await fetch(`${API_BASE}/sheets`, {
     method: 'POST',
@@ -256,13 +238,7 @@ const callApi = async (action, data) => {
     }
   };
 
-  // --------------------------------------------------------------------------
-  const projectSlug = formData.title
-  .toLowerCase()
-  .replace(/[^a-z0-9]+/g, "-");
 
-
-  // -------------------------------------------------------------------------------
 
   const handleEdit = (project) => {
     setFormData({
@@ -470,7 +446,7 @@ const callApi = async (action, data) => {
                   <ImageUpload
                     label="Main Image"
                     value={formData.image}
-                    projectSlug={projectSlug}
+                    projectId={formData.id}
                     onChange={(url) =>
                       setFormData((prev) => ({ ...prev, image: url }))
                     }
@@ -507,7 +483,7 @@ const callApi = async (action, data) => {
                 <ImageUpload
                   label="Image 1 URL"
                   value={formData.img1}
-                  projectSlug={projectSlug}
+                  projectId={formData.id}
                   onChange={(url) =>
                     setFormData((prev) => ({ ...prev, img1: url }))
                   }
@@ -536,7 +512,7 @@ const callApi = async (action, data) => {
                 <ImageUpload
                   label="Image 2 URL"
                   value={formData.img2}
-                  projectSlug={projectSlug}
+                  projectId={formData.id}
                   onChange={(url) =>
                     setFormData((prev) => ({ ...prev, img2: url }))
                   }
@@ -564,7 +540,7 @@ const callApi = async (action, data) => {
                <ImageUpload
                   label="Image 3 URL"
                   value={formData.img3}
-                  projectSlug={projectSlug}
+                  projectId={formData.id}
                   onChange={(url) =>
                     setFormData((prev) => ({ ...prev, img3: url }))
                   }
@@ -591,7 +567,7 @@ const callApi = async (action, data) => {
                 <ImageUpload
                   label="Image 4 URL"
                   value={formData.img4}
-                  projectSlug={projectSlug}
+                  projectId={formData.id}
                   onChange={(url) =>
                     setFormData((prev) => ({ ...prev, img4: url }))
                   }
@@ -618,7 +594,7 @@ const callApi = async (action, data) => {
                 <ImageUpload
                   label="Image 5 URL"
                   value={formData.img5}
-                  projectSlug={projectSlug}
+                  projectId={formData.id}
                   onChange={(url) =>
                     setFormData((prev) => ({ ...prev, img5: url }))
                   }
