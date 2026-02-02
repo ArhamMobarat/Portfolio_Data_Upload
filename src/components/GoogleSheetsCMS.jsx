@@ -6,6 +6,7 @@ import { useDropzone } from 'react-dropzone';
 
 // ------------------------------------------
 
+const MODEL_BASE_URL = "https://cdn.jsdelivr.net/gh/ArhamMobarat/portfolio-3d-models@main/";
 
 function ImageUpload({ label, value, onChange, projectId }) {
   const [imagePreview, setImagePreview] = useState(value || "");
@@ -147,7 +148,13 @@ export default function GoogleSheetsCMS() {
     img2: '', p2: '',
     img3: '', p3: '',
     img4: '', p4: '',
-    img5: '', p5: ''
+    img5: '', p5: '',
+
+
+    code1: '',
+    code1Lang: 'javascript',
+    code2: '',
+    code2Lang: 'javascript',
   });
 
   // === CONFIG ===
@@ -221,7 +228,12 @@ const callApi = async (action, data) => {
       img2: '', p2: '',
       img3: '', p3: '',
       img4: '', p4: '',
-      img5: '', p5: ''
+      img5: '', p5: '',
+
+      code1: '',
+      code1Lang: 'javascript',
+      code2: '',
+      code2Lang: 'javascript',
     });
     setEditingId(null);
     setShowAddForm(false);
@@ -243,8 +255,14 @@ const callApi = async (action, data) => {
   const handleEdit = (project) => {
     setFormData({
       ...project,
-      details: Array.isArray(project.details) ? project.details.join('; ') : project.details
+      modelUrl: project.modelUrl?.startsWith(MODEL_BASE_URL)
+        ? project.modelUrl.replace(MODEL_BASE_URL, "")
+        : "",
+      details: Array.isArray(project.details)
+        ? project.details.join('; ')
+        : project.details
     });
+
     setEditingId(project.id);
     setShowAddForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -277,12 +295,20 @@ const callApi = async (action, data) => {
         return;
       }
 
-      const payload = {
-        ...formData,
-        id: editingId || formData.id || Date.now().toString(),
-        // store details as string; keep your UI expectation
-        details: typeof formData.details === 'string' ? formData.details : (formData.details ?? '')
-      };
+      const fullModelUrl =
+  formData.modelUrl.trim() !== ""
+    ? MODEL_BASE_URL + formData.modelUrl.trim()
+    : "";
+
+const payload = {
+  ...formData,
+  id: editingId || formData.id || Date.now().toString(),
+  modelUrl: fullModelUrl,
+  details: typeof formData.details === 'string'
+    ? formData.details
+    : (formData.details ?? '')
+};
+
 
       if (editingId) {
         await callApi('update', payload);
@@ -563,6 +589,42 @@ const callApi = async (action, data) => {
 
 
                 {/* -------------------------------------------------------------------- */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
+                    Code Block 1
+                  </label>
+
+                  <textarea
+                    name="code1"
+                    value={formData.code1}
+                    onChange={handleInputChange}
+                    rows={12}
+                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg font-mono text-sm text-gray-200 resize-y"
+                    placeholder={`Paste code here...\nPreserves spacing & indentation`}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
+                    Code Language
+                  </label>
+
+                  <select
+                    name="code1Lang"
+                    value={formData.code1Lang}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg"
+                  >
+                    <option value="javascript">JavaScript</option>
+                    <option value="cpp">C++</option>
+                    <option value="c">C</option>
+                    <option value="python">Python</option>
+                    <option value="java">Java</option>
+                    <option value="bash">Bash</option>
+                    <option value="json">JSON</option>
+                  </select>
+                </div>
+
                   {/* ------------------------------------------------------------ */}
                 <ImageUpload
                   label="Image 4 URL"
@@ -590,6 +652,42 @@ const callApi = async (action, data) => {
 
 
                 {/* -------------------------------------------------------------------- */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
+                    Code Block 2
+                  </label>
+
+                  <textarea
+                    name="code2"
+                    value={formData.code2}
+                    onChange={handleInputChange}
+                    rows={12}
+                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg font-mono text-sm text-gray-200 resize-y"
+                    placeholder={`Paste code here...\nPreserves spacing & indentation`}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
+                    Code Language
+                  </label>
+
+                  <select
+                    name="code2Lang"
+                    value={formData.code2Lang}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg"
+                  >
+                    <option value="javascript">JavaScript</option>
+                    <option value="cpp">C++</option>
+                    <option value="c">C</option>
+                    <option value="python">Python</option>
+                    <option value="java">Java</option>
+                    <option value="bash">Bash</option>
+                    <option value="json">JSON</option>
+                  </select>
+                </div>
+
                   {/* ------------------------------------------------------------ */}
                 <ImageUpload
                   label="Image 5 URL"
@@ -644,17 +742,43 @@ const callApi = async (action, data) => {
                   />
                 </div>
                 <div>
+                  {/* <label className="block text-sm font-semibold text-gray-300 mb-2">
+                    3D Model URL (.glb or .gltf)
+                  </label> */}
+                  <div>
                   <label className="block text-sm font-semibold text-gray-300 mb-2">
                     3D Model URL (.glb or .gltf)
                   </label>
-                  <input
+
+                  <div className="flex rounded-lg overflow-hidden border border-slate-600 bg-slate-900/50 focus-within:border-cyan-500">
+                    {/* Fixed prefix */}
+                    <span
+                      className="px-3 py-3 text-gray-400 text-sm bg-slate-800 border-r border-slate-600 whitespace-nowrap"
+                      title={MODEL_BASE_URL}
+                    >
+                      {MODEL_BASE_URL}
+                    </span>
+
+                    {/* Editable suffix */}
+                    <input
+                      type="text"
+                      name="modelUrl"
+                      value={formData.modelUrl}
+                      onChange={handleInputChange}
+                      className="flex-1 px-4 py-3 bg-transparent text-white focus:outline-none"
+                      placeholder="model-name.glb"
+                    />
+                  </div>
+                </div>
+
+                  {/* <input
                     type="url"
                     name="modelUrl"
                     value={formData.modelUrl}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg focus:outline-none focus:border-cyan-500 transition-colors"
                     placeholder="https://example.com/model.glb"
-                  />
+                  /> */}
                 </div>
               </div>
 
