@@ -133,7 +133,7 @@ export default function GoogleSheetsCMS() {
   // Form state
   const [formData, setFormData] = useState({
     id: Date.now().toString(),
-    category: 'engineering',
+    category: '3d-modeling',
     title: '',
     subtitle: '',
     description: '',
@@ -214,7 +214,7 @@ const callApi = async (action, data) => {
   const resetForm = () => {
     setFormData({
       id: Date.now().toString(),
-      category: 'engineering',
+      category: '3d-modeling',
       title: '',
       subtitle: '',
       description: '',
